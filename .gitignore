@@ -3,6 +3,15 @@
 # dependencies
 node_modules/
 
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+
 # Expo
 .expo/
 dist/
