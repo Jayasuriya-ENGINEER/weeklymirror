@@ -1,9 +1,8 @@
 import { Stack } from "expo-router";
+import { useAuth } from "../hooks/useAuth";
 
 export default function RootLayout() {
-  return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
-  );
+  useAuth();
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

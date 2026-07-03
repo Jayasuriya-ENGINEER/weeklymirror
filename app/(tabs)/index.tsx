@@ -6,11 +6,13 @@ import GreetingCard from "../components/GreetingCard";
 import DateCard from "../components/DateCard";
 import WeekTracker from "../components/WeekTracker";
 import CaptureCard from '../components/CaptureCard';  
-import MemoryFeed from '../components/MemoryFeed';
-
+import TodaysHighlights from "../components/TodaysHighlights";
+import { useAuthStore } from "../../stores/authStore";
 import { ScrollView } from "react-native";
+import StreakCard from '../components/StreakCard';
 
 const index = () => {
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -21,8 +23,10 @@ const index = () => {
       >
         <GreetingCard />
         <DateCard />
+        <StreakCard />
         <CaptureCard />
-        <MemoryFeed />
+        <TodaysHighlights />
+
         <WeekTracker />
       </ScrollView>
     </SafeAreaView>
@@ -30,6 +34,9 @@ const index = () => {
 }
 
 export default index
+
+
+
 
 const styles = StyleSheet.create({
 

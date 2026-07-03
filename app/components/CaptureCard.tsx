@@ -10,10 +10,25 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useMemoryStore } from "../../stores/memoryStore";
+
+
+import { createMemory , uploadImage} from "../../services/memoryService";
+import { useAuthStore } from "../../stores/authStore";
+import { Ionicons } from "@expo/vector-icons";
+import { syncEdition } from "@/engines/editionEngine";
+
 export default function CaptureCard() {
+  const triggerRefresh = useMemoryStore((state) => state.triggerRefresh);
   const [note, setNote] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const { addMemory } = useMemoryStore();
+  //const { addMemory } = useMemoryStore();
+  const user = useAuthStore((state) => state.user);
+
+  const today = new Date();
+
+  const memoryDate = `${today.getFullYear()}-${String(
+    today.getMonth() + 1,
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -35,34 +50,71 @@ export default function CaptureCard() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      console.log("IMAGE URI:", result.assets[0].uri);
     }
   };
 
-  const handleSave = () => {
-    if (!note.trim() && !image) {
-      Alert.alert("Empty Memory", "Please add a photo or write something.");
-      return;
-    }
+ const handleSave = async () => {
+   try {
+     if (!note.trim()) {
+       Alert.alert("Missing Note", "Please write something.");
+       return;
+     }
 
-    console.log("Memory Saved");
-    addMemory({
-      id: Date.now().toString(),
-      note,
-      image,
-    });
+     if (!user) {
+       Alert.alert("Error", "User not found.");
+       return;
+     }
 
-    Alert.alert("Success", "Memory saved successfully!");
+     let imageUrl: string | undefined;
 
-    setNote("");
-    setImage(null);
-  };
+     if (image) {
+       const { error, publicUrl } = await uploadImage(image);
+
+       if (error) {
+         Alert.alert("Upload Error", String(error));
+         return;
+       }
+
+       imageUrl = publicUrl ?? undefined;
+     }
+
+     const { error } = await createMemory(user.id, note, imageUrl , memoryDate);
+
+     if (error) {
+       Alert.alert("Database Error", error.message);
+       return;
+     }
+
+     Alert.alert("Saved", "Memory stored successfully");
+
+     setNote("");
+     setImage(null);
+
+     //this await is currently for a check will remove it later
+    await syncEdition(user.id, memoryDate);
+
+
+     triggerRefresh();
+     //this trigger here is for the autotrigger option
+   } catch (err) {
+     console.log(err);
+
+     Alert.alert("Error", "Something went wrong");
+   }
+ };
+
+
 
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Today Memory</Text>
 
       <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-        <Text style={styles.photoButtonText}>📷 Add Photo</Text>
+        <Text style={styles.photoButtonText}>
+          <Ionicons name="image-outline" size={20} color="#1F1F1F" />
+               Add Photo
+        </Text>
       </TouchableOpacity>
 
       {image && <Image source={{ uri: image }} style={styles.preview} />}
