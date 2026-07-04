@@ -23,6 +23,14 @@ import {
   saveWeeklyReminder,
 } from "../../services/settingsService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  requestNotificationPermission,
+  sendTestNotification,
+} from "../../services/notificationService";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { saveReminderTime } from "../../services/settingsService";
+import { scheduleReminderSequence } from "../../services/notificationService";
+
 
 
 export default function Settings() {
@@ -32,6 +40,14 @@ export default function Settings() {
   const [weeklyReminder, setWeeklyReminder] = useState(true);
   const user = useAuthStore((state) => state.user);
   const [userName, setUserName] = useState("Your Name");
+  const [showPicker, setShowPicker] = useState(false);
+
+const [reminderTime, setReminderTime] = useState(() => {
+  const date = new Date();
+  date.setHours(20);
+  date.setMinutes(0);
+  return date;
+});
   const handleLogout = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       {
@@ -54,10 +70,34 @@ export default function Settings() {
       },
     ]);
   };
+const setupNotifications = async () => {
+  const granted = await requestNotificationPermission();
 
- useEffect(() => {
-   loadProfile();
- }, []);
+  console.log("Notification permission:", granted);
+
+  if (!granted) {
+    Alert.alert(
+      "Permission Required",
+      "Please allow notifications to receive reminders.",
+    );
+    return;
+  }
+
+
+
+
+  await sendTestNotification();
+
+  console.log("Test notification scheduled.");
+};
+
+
+
+useEffect(() => {
+  loadProfile();
+  loadSettings();
+}, []);
+
 
  const loadProfile = async () => {
    const value = await AsyncStorage.getItem("profile");
@@ -69,12 +109,27 @@ export default function Settings() {
    setUserName(profile.name);
  };
 
-  const loadSettings = async () => {
-    const settings = await loadNotificationSettings();
+const loadSettings = async () => {
+  const settings = await loadNotificationSettings();
 
-    setDailyReminder(settings.dailyReminder);
-    setWeeklyReminder(settings.weeklyReminder);
-  };
+  setDailyReminder(settings.dailyReminder);
+  setWeeklyReminder(settings.weeklyReminder);
+
+  if (settings.reminderTime) {
+    const [time, period] = settings.reminderTime.split(" ");
+
+    let [hour, minute] = time.split(":").map(Number);
+
+    if (period === "PM" && hour !== 12) hour += 12;
+    if (period === "AM" && hour === 12) hour = 0;
+
+    const date = new Date();
+    date.setHours(hour);
+    date.setMinutes(minute);
+
+    setReminderTime(date);
+  }
+};
 
   return (
     <ScrollView
@@ -127,8 +182,11 @@ export default function Settings() {
       <SettingsRow
         icon="time-outline"
         title="Reminder Time"
-        subtitle="8:00 PM"
-        onPress={() => {}}
+        subtitle={reminderTime.toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        })}
+        onPress={() => setShowPicker(true)}
       />
 
       <View style={styles.switchRow}>
@@ -161,9 +219,63 @@ export default function Settings() {
 
       <Text style={styles.version}>Version 1.0.0</Text>
 
+      <TouchableOpacity
+        style={{
+          marginTop: 20,
+          backgroundColor: "#A98B5E",
+          padding: 15,
+          borderRadius: 12,
+        }}
+        onPress={async () => {
+          const granted = await requestNotificationPermission();
+
+          if (granted) {
+            await sendTestNotification();
+            Alert.alert("Success", "Notification scheduled in 10 seconds.");
+          }
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            textAlign: "center",
+            fontWeight: "700",
+          }}
+        >
+          Test Notification
+        </Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logout} onPress={handleLogout}>
         <Text style={styles.logoutText}>Sign Out</Text>
       </TouchableOpacity>
+
+      {showPicker && (
+        <DateTimePicker
+          value={reminderTime}
+          mode="time"
+          display="default"
+          onChange={async (_, selected) => {
+            setShowPicker(false);
+
+            if (!selected) return;
+
+            setReminderTime(selected);
+
+            const formatted = selected.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "2-digit",
+            });
+
+            await saveReminderTime(formatted);
+
+            await scheduleReminderSequence(
+              selected.getHours(),
+              selected.getMinutes(),
+            );
+          }}
+        />
+      )}
     </ScrollView>
   );
 }

@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from "../stores/authStore";
 import { syncCurrentEdition } from "../engines/editionEngine";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setupNotifications } from "../services/notificationService";
 
 
 export default function Index() {
@@ -19,8 +20,11 @@ useEffect(() => {
       return;
     }
 
-    await syncCurrentEdition(user.id);
-    await AsyncStorage.removeItem("onboarding_complete");
+   await syncCurrentEdition(user.id);
+
+   await setupNotifications();
+
+   router.replace("/(tabs)");
 
     const completed = await AsyncStorage.getItem("onboarding_complete");
 

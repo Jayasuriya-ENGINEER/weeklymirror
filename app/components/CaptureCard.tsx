@@ -12,7 +12,11 @@ import * as ImagePicker from "expo-image-picker";
 import { useMemoryStore } from "../../stores/memoryStore";
 
 
-import { createMemory , uploadImage} from "../../services/memoryService";
+import {
+  createMemory,
+  uploadImage,
+  getTodayImageMemory,
+} from "../../services/memoryService";
 import { useAuthStore } from "../../stores/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { syncEdition } from "@/engines/editionEngine";
@@ -30,6 +34,27 @@ export default function CaptureCard() {
     today.getMonth() + 1,
   ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
+
+
+
+
+
+
+  const openGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+
+  
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -40,6 +65,36 @@ export default function CaptureCard() {
       );
       return;
     }
+
+    if (!user) return;
+
+    const { data: existingImage } = await getTodayImageMemory(
+      user.id,
+      memoryDate,
+    );
+
+    if (existingImage) {
+      Alert.alert(
+        "Today's photo already exists",
+        "WeeklyMirror uses one photo to represent each day.\n\nDo you want to replace today's photo?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Replace Photo",
+            onPress: async () => {
+              openGallery();
+            },
+          },
+        ],
+      );
+
+      return;
+    }
+
+    openGallery();
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],

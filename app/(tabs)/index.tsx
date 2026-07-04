@@ -11,6 +11,8 @@ import { useAuthStore } from "../../stores/authStore";
 import { ScrollView } from "react-native";
 import StreakCard from '../components/StreakCard';
 
+
+
 const index = () => {
 
   return (

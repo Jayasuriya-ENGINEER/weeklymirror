@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import * as FileSystem from "expo-file-system";
 import { File } from "expo-file-system";
+import { cancelReminderSequence } from "./notificationService";
 
 export const createMemory = async (
   userId: string,
@@ -8,7 +9,7 @@ export const createMemory = async (
   imageUrl?: string,
   memoryDate?: string,
 ) => {
-  return await supabase.from("memories").insert([
+  const result = await supabase.from("memories").insert([
     {
       user_id: userId,
       content,
@@ -16,6 +17,12 @@ export const createMemory = async (
       memory_date: memoryDate,
     },
   ]);
+
+  if (!result.error) {
+    await cancelReminderSequence();
+  }
+
+  return result;
 };
 
 export const uploadImage = async (imageUri: string) => {
@@ -170,3 +177,16 @@ export const getMemoriesBetweenDates = async (
     .order("created_at", { ascending: true });
 };
 
+export const getTodayImageMemory = async (
+  userId: string,
+  memoryDate: string,
+) => {
+  return await supabase
+    .from("memories")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("memory_date", memoryDate)
+    .not("image_url", "is", null)
+    .limit(1)
+    .maybeSingle();
+};

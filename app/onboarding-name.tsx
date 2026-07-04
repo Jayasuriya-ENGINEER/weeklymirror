@@ -24,7 +24,7 @@ export default function OnboardingName() {
 
    await AsyncStorage.setItem("onboarding_complete", "true");
 
-   router.replace("/(tabs)");
+   router.replace("/onboarding-reminder");
  };
  
   return (
