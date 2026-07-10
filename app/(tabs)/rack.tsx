@@ -21,6 +21,11 @@ import {getEditions} from "../../services/editionService";
 import CircularMonthPicker from "../components/CircularMonthPicker";
 import { isFutureMonth } from "@/utils/rackUtils";
 
+
+
+import { useFocusEffect } from "@react-navigation/native";
+
+
 export default function Rack() {
   const router = useRouter();
   const [year, setYear] = useState(new Date().getFullYear());
@@ -44,9 +49,11 @@ export default function Rack() {
    setEditions(data || []);
   };
 
-  useEffect(() => {
-    loadEditions();
-  }, [month, year]);
+ useFocusEffect(
+   React.useCallback(() => {
+     loadEditions();
+   }, [month, year, user]),
+ );
 
 
 const [selectedEdition, setSelectedEdition] = useState<any>(null);

@@ -32,5 +32,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({
       user: null,
       session: null,
+      loading: false,
     }),
 }));

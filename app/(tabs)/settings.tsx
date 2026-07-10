@@ -7,7 +7,9 @@ import {
   Switch,
   TouchableOpacity,
   Linking,
+  Image,
 } from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 
 import SettingsRow from "../components/settings/SettingsRow";
@@ -30,6 +32,13 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { saveReminderTime } from "../../services/settingsService";
 import { scheduleReminderSequence } from "../../services/notificationService";
+import * as ImagePicker from "expo-image-picker";
+
+import {
+  getProfile,
+  saveProfile,
+  uploadProfileImage,
+} from "../../services/profileService";
 
 
 
@@ -40,7 +49,10 @@ export default function Settings() {
   const [weeklyReminder, setWeeklyReminder] = useState(true);
   const user = useAuthStore((state) => state.user);
   const [userName, setUserName] = useState("Your Name");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
+
+  
 
 const [reminderTime, setReminderTime] = useState(() => {
   const date = new Date();
@@ -99,15 +111,78 @@ useEffect(() => {
 }, []);
 
 
- const loadProfile = async () => {
-   const value = await AsyncStorage.getItem("profile");
+const loadProfile = async () => {
+  if (!user) return;
 
-   if (!value) return;
+  const { data } = await getProfile(user.id);
 
-   const profile = JSON.parse(value);
+  if (!data) return;
 
-   setUserName(profile.name);
- };
+  if (data.name) {
+    setUserName(data.name);
+  }
+
+  if (data.avatar_url) {
+    setAvatarUrl(data.avatar_url);
+  }
+};
+
+
+
+const pickProfileImage = async () => {
+  if (!user) return;
+
+  const permission =
+    await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+  if (!permission.granted) {
+    Alert.alert(
+      "Permission Required",
+      "Please allow photo access.",
+    );
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  });
+
+  if (result.canceled) return;
+
+  const imageUri = result.assets[0].uri;
+
+  const { avatarUrl, error } = await uploadProfileImage(
+    user.id,
+    imageUri,
+  );
+
+if (error || !avatarUrl) {
+  console.log(error);
+  Alert.alert("Upload Failed", JSON.stringify(error));
+  return;
+}
+
+  const { error: saveError } = await saveProfile(
+    user.id,
+    userName,
+    avatarUrl,
+  );
+
+  if (saveError) {
+    Alert.alert(saveError.message);
+    return;
+  }
+
+  setAvatarUrl(avatarUrl);
+
+  Alert.alert("Success", "Profile picture updated.");
+};
+
+
+
 
 const loadSettings = async () => {
   const settings = await loadNotificationSettings();
@@ -142,9 +217,17 @@ const loadSettings = async () => {
       <SectionTitle title="Account" />
 
       <View style={styles.profile}>
-        <View style={styles.avatar}>
-          <Ionicons name="person" size={30} color="#A98B5E" />
-        </View>
+        <TouchableOpacity
+          style={styles.avatar}
+          activeOpacity={0.8}
+          onPress={pickProfileImage}
+        >
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <Ionicons name="person" size={30} color="#A98B5E" />
+          )}
+        </TouchableOpacity>
 
         <View>
           <Text style={styles.name}>{userName}</Text>
@@ -356,5 +439,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "700",
     fontSize: 17,
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 32,
   },
 });

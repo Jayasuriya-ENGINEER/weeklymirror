@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   visible: boolean;
@@ -22,29 +23,55 @@ export default function PublishEditionModal({
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.logo}>WEEKLY MIRROR</Text>
-
-          <Text style={styles.title}>
-            Publish Issue {edition?.issue_number ?? ""}?
-          </Text>
-
-          <View style={styles.info}>
-            <Text>{memoryCount} Memories</Text>
-
-            <Text>{edition?.captured_days ?? 0} Captured Days</Text>
-
-            <Text>{imageCount} Photos</Text>
+          <View style={styles.iconContainer}>
+            <Ionicons name="book-outline" size={34} color="#A98B5E" />
           </View>
 
-          <Text style={styles.time}>Estimated time: 20–30 seconds</Text>
+          <Text style={styles.logo}>WeeklyMirror</Text>
+
+          <Text style={styles.title}>
+            Publish Issue {edition?.issue_number}
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Your memories will be transformed into a beautifully formatted
+            weekly edition using AI.
+          </Text>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{memoryCount}</Text>
+              <Text style={styles.statLabel}>Memories</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>
+                {edition?.captured_days ?? 0}
+              </Text>
+              <Text style={styles.statLabel}>Days</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{imageCount}</Text>
+              <Text style={styles.statLabel}>Photos</Text>
+            </View>
+          </View>
+
+          <View style={styles.timeBox}>
+            <Ionicons name="time-outline" size={18} color="#A98B5E" />
+
+            <Text style={styles.time}>
+              Estimated generation time: 20–30 seconds
+            </Text>
+          </View>
 
           <View style={styles.buttons}>
-            <TouchableOpacity onPress={onCancel}>
-              <Text style={styles.cancel}>Cancel</Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+              <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.publishButton} onPress={onPublish}>
-              <Text style={styles.publishText}>Publish</Text>
+              <Text style={styles.publishText}>Publish Edition</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -53,54 +80,136 @@ export default function PublishEditionModal({
   );
 }
 
-const styles=StyleSheet.create({
+const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 24,
   },
+
   card: {
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
-    width: "80%",
+    width: "100%",
+    backgroundColor: "#F6F5F2",
+    borderRadius: 24,
+    padding: 26,
   },
+
+  iconContainer: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#EFE7DA",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+
   logo: {
-    fontSize: 24,
-    fontWeight: "bold",
+    marginTop: 16,
     textAlign: "center",
-    marginBottom: 10,
+    fontSize: 15,
+    color: "#A98B5E",
+    letterSpacing: 3,
+    fontWeight: "700",
   },
+
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
+    marginTop: 12,
     textAlign: "center",
-    marginBottom: 20,
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#222",
   },
-  info: {
-    marginBottom: 20,
-  },
-  time: {
+
+  subtitle: {
+    marginTop: 12,
     textAlign: "center",
-    marginBottom: 20,
+    color: "#666",
+    lineHeight: 24,
+    fontSize: 15,
   },
-  buttons: {
+
+  statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 28,
   },
-  cancel: {
-    color: "red",
-    fontWeight: "bold",
+
+  statCard: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    borderRadius: 18,
+    paddingVertical: 18,
+    marginHorizontal: 4,
+    alignItems: "center",
   },
+
+  statValue: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#A98B5E",
+  },
+
+  statLabel: {
+    marginTop: 6,
+    color: "#777",
+    fontSize: 13,
+  },
+
+  timeBox: {
+    marginTop: 26,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EFE7DA",
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+
+  time: {
+    marginLeft: 8,
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+
+  buttons: {
+    flexDirection: "row",
+    marginTop: 30,
+  },
+
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#DDD",
+  },
+
+  cancelText: {
+    color: "#666",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
   publishButton: {
-    backgroundColor: "green",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    flex: 1.4,
+    backgroundColor: "#A98B5E",
+    borderRadius: 16,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginLeft: 10,
   },
+
   publishText: {
-    color: "white",
-    fontWeight: "bold",
-  },  
-})
+    color: "#FFF",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+});

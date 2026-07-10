@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { getEditionStatus } from "../../utils/editionStatus";
 
-
+import { useFocusEffect } from "@react-navigation/native";
 
 interface Props {
   id: string;

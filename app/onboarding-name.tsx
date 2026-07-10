@@ -10,23 +10,31 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { useAuthStore } from "../stores/authStore";
+import { updateProfileName } from "../services/profileService";
+
 export default function OnboardingName() {
   const router = useRouter();
 
+  const user = useAuthStore((state) => state.user);
+
   const [name, setName] = useState("");
 
- const finish = async () => {
-   const profile = {
-     name: name,
-   };
+  const finish = async () => {
+    if (!user) return;
 
-   await AsyncStorage.setItem("profile", JSON.stringify(profile));
+    const { error } = await updateProfileName(user.id, name.trim());
 
-   await AsyncStorage.setItem("onboarding_complete", "true");
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-   router.replace("/onboarding-reminder");
- };
- 
+    await AsyncStorage.setItem("onboarding_complete", "true");
+
+    router.replace("/onboarding-reminder");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>What should we call you?</Text>

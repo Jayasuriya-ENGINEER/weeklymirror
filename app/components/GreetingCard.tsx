@@ -1,26 +1,14 @@
-import { View, Text, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import React from "react";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+import { useProfileStore } from "../../stores/profileStore";
 
 export default function GreetingCard() {
-  const now = new Date();
-  const hour = now.getHours();
+  const userName = useProfileStore((state) => state.name);
+  const avatarUrl = useProfileStore((state) => state.avatarUrl);
 
-  const [userName, setUserName] = useState("Your Name");
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    const value = await AsyncStorage.getItem("profile");
-
-    if (!value) return;
-
-    const profile = JSON.parse(value);
-
-    setUserName(profile.name);
-  };
+  const hour = new Date().getHours();
 
   let greeting = "";
 
@@ -34,9 +22,20 @@ export default function GreetingCard() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.greeting}>{greeting},</Text>
+      <View style={styles.row}>
+        <View style={styles.avatar}>
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <Ionicons name="person" size={30} color="#A98B5E" />
+          )}
+        </View>
 
-      <Text style={styles.username}>{userName}</Text>
+        <View style={styles.textContainer}>
+          <Text style={styles.greeting}>{greeting},</Text>
+          <Text style={styles.username}>{userName}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -46,14 +45,40 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#EFE7DA",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    marginRight: 15,
+  },
+
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  textContainer: {
+    flex: 1,
+  },
+
   greeting: {
-    fontSize: 20,
+    fontSize: 18,
     color: "#666",
   },
 
   username: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "700",
     color: "#222",
+    marginTop: 2,
   },
 });

@@ -19,5 +19,5 @@ export const getEditionStatus = (
     return "ready";
   }
 
-  return "ready";
+  return "draft";
 };
