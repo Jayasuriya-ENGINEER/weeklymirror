@@ -10,6 +10,22 @@ export default function GreetingCard() {
 
   const hour = new Date().getHours();
 
+  const quotes = [
+    "Today's page is waiting.",
+    "Every memory begins with a single moment.",
+    "Small moments become lifelong memories.",
+    "Capture today before it becomes yesterday.",
+    "A beautiful life is written one day at a time.",
+    "The little things are worth remembering.",
+    "Today's ordinary may become tomorrow's treasure.",
+    "Every sunset deserves a sentence.",
+    "Life is made of moments, not milestones.",
+    "One memory. One page. Every day.",
+  ];
+
+  const day = new Date().getDate();
+  const quote = quotes[day % quotes.length];
+
   let greeting = "";
 
   if (hour < 12) {
@@ -34,6 +50,7 @@ export default function GreetingCard() {
         <View style={styles.textContainer}>
           <Text style={styles.greeting}>{greeting},</Text>
           <Text style={styles.username}>{userName}</Text>
+          <Text style={styles.quote}>{quote}</Text>
         </View>
       </View>
     </View>
@@ -51,9 +68,9 @@ const styles = StyleSheet.create({
   },
 
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 80,
+    height: 102,
+    borderRadius: 36,
     backgroundColor: "#EFE7DA",
     justifyContent: "center",
     alignItems: "center",
@@ -72,13 +89,19 @@ const styles = StyleSheet.create({
 
   greeting: {
     fontSize: 18,
-    color: "#666",
+    color: "#7A7A7A",
   },
 
   username: {
     fontSize: 30,
     fontWeight: "700",
-    color: "#222",
+    color: "#1E1E1E",
     marginTop: 2,
+  },
+
+  quote: {
+    fontSize: 16,
+    color: "#7A7A7A",
+    fontStyle: "italic",
   },
 });

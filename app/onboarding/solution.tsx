@@ -9,29 +9,30 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const TOTAL_SCREENS = 8;
 const CURRENT_SCREEN = 3;
 
-// Step data
+// Step data with Ionicons
 const STEPS = [
   {
     id: 1,
-    icon: "📝",
+    icon: "create-outline",
     title: "Capture in 30 seconds",
-    description: "Jot down your thoughts, add a photo if you like",
+    description: "Jot down thoughts, add a photo",
   },
   {
     id: 2,
-    icon: "✨",
+    icon: "sparkles",
     title: "AI organizes automatically",
-    description: "Your entries are categorized, themed, and designed",
+    description: "Categorized, themed & designed",
   },
   {
     id: 3,
-    icon: "📰",
+    icon: "newspaper-outline",
     title: "Get your weekly edition",
-    description: "Every Sunday, receive a beautiful newspaper of your week",
+    description: "Beautiful newspaper every Sunday",
   },
 ];
 
@@ -53,42 +54,57 @@ export default function OnboardingSolution() {
           {Array.from({ length: TOTAL_SCREENS }).map((_, i) => (
             <View
               key={i}
-              style={[
-                styles.dot,
-                i === CURRENT_SCREEN && styles.activeDot,
-              ]}
+              style={[styles.dot, i === CURRENT_SCREEN && styles.activeDot]}
             />
           ))}
         </View>
 
         <Text style={styles.headline}>Here's how WeeklyMirror works</Text>
         <Text style={styles.subheadline}>
-          The simple 3-step system for effortless journaling
+          Simple 3-step system for effortless journaling
         </Text>
 
         {/* Steps */}
         <View style={styles.stepsContainer}>
           {STEPS.map((step, index) => (
             <View key={step.id} style={styles.stepCard}>
-              {/* Step number */}
-              <View style={styles.stepNumberContainer}>
+              {/* Step number with gradient */}
+              <LinearGradient
+                colors={["#A98B5E", "#8B7355"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.stepNumberContainer}
+              >
                 <Text style={styles.stepNumber}>{index + 1}</Text>
-              </View>
+              </LinearGradient>
 
-              {/* Icon */}
-              <Text style={styles.stepIcon}>{step.icon}</Text>
+              {/* Icon container */}
+              <View style={styles.iconContainer}>
+                <Ionicons name={step.icon as any} size={24} color="#A98B5E" />
+              </View>
 
               {/* Text content */}
               <View style={styles.stepTextContainer}>
                 <Text style={styles.stepTitle}>{step.title}</Text>
                 <Text style={styles.stepDescription}>{step.description}</Text>
               </View>
+
+              {/* Arrow indicator */}
+              <Ionicons name="chevron-forward" size={20} color="#CCC" />
             </View>
           ))}
         </View>
 
         <TouchableOpacity style={styles.button} onPress={next}>
-          <Text style={styles.buttonText}>See it in action</Text>
+          <LinearGradient
+            colors={["#A98B5E", "#8B7355"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.buttonGradient}
+          >
+            <Text style={styles.buttonText}>See it in action</Text>
+            <Ionicons name="arrow-forward" size={20} color="#FFF" />
+          </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -101,106 +117,118 @@ const styles = StyleSheet.create({
     backgroundColor: "#F6F5F2",
   },
   scrollContent: {
-    padding: 30,
-    paddingTop: 60,
-    paddingBottom: 60,
+    padding: 24,
+    paddingTop: 40,
+    paddingBottom: 40,
     alignItems: "center",
   },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 40,
+    marginBottom: 30,
     width: "100%",
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: "#DDD",
-    marginHorizontal: 5,
+    marginHorizontal: 4,
   },
   activeDot: {
     backgroundColor: "#A98B5E",
-    width: 28,
+    width: 24,
   },
   headline: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: "700",
     color: "#222",
     textAlign: "center",
-    lineHeight: 42,
+    lineHeight: 36,
   },
   subheadline: {
-    marginTop: 10,
-    fontSize: 17,
-    lineHeight: 28,
-    color: "#666",
+    marginTop: 8,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#888",
     textAlign: "center",
   },
   stepsContainer: {
     width: "100%",
-    marginTop: 40,
-    gap: 16,
+    marginTop: 30,
+    gap: 14,
   },
   stepCard: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     backgroundColor: "#FFF",
-    padding: 20,
+    padding: 18,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: "#EAEAEA",
+    shadowColor: "#A98B5E",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   stepNumberContainer: {
-    backgroundColor: "#A98B5E",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    marginRight: 12,
   },
   stepNumber: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
-  stepIcon: {
-    fontSize: 28,
-    marginRight: 16,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "rgba(169, 139, 94, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
   stepTextContainer: {
     flex: 1,
   },
   stepTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "700",
     color: "#222",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   stepDescription: {
-    fontSize: 15,
-    color: "#666",
-    lineHeight: 22,
+    fontSize: 13,
+    color: "#888",
+    lineHeight: 18,
   },
   button: {
-    backgroundColor: "#A98B5E",
-    paddingVertical: 16,
-    paddingHorizontal: 40,
     borderRadius: 18,
-    marginTop: 40,
+    marginTop: 30,
+    overflow: "hidden",
+    shadowColor: "#A98B5E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  buttonGradient: {
+    flexDirection: "row",
     alignItems: "center",
-    alignSelf: "center",
-    minWidth: 200,
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
   },
   buttonText: {
     color: "white",
     fontWeight: "700",
-    fontSize: 17,
+    fontSize: 16,
   },
 });

@@ -287,9 +287,8 @@ const loadSettings = async () => {
           onPress={() => setEditingName(true)}
         >
           <Text style={styles.name}>{userName}</Text>
+          <Text style={styles.email}>{user?.email || "your@email.com"}</Text>
         </TouchableOpacity>
-
-        <Text style={styles.email}>{user?.email || "your@email.com"}</Text>
       </View>
 
       <SectionTitle title="Support" />

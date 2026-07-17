@@ -2,42 +2,35 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { getEditionStatus } from "../../utils/editionStatus";
 
-import { useFocusEffect } from "@react-navigation/native";
-
 interface Props {
   id: string;
-
   issueNumber: number;
-
   startDate: string;
-
   endDate: string;
-
   capturedDays: number;
-
   status: string;
-
   onPress?: () => void;
   onPublish?: () => void;
   onRead?: () => void;
 }
+
+
+
 
 export default function WeeklyEditionCard({
   issueNumber,
   startDate,
   endDate,
   capturedDays,
-  onPress,
   onPublish,
   onRead,
   status,
 }: Props) {
-
-  const displayStatus = getEditionStatus(status, endDate,capturedDays);
+  const displayStatus = getEditionStatus(status, endDate, capturedDays);
 
   return (
     <View style={styles.card}>
-      <Text style={styles.week}> {`Issue ${issueNumber}`}</Text>
+      <Text style={styles.week}>{`Issue ${issueNumber}`}</Text>
 
       <Text style={styles.date}>
         {startDate} - {endDate}
@@ -45,8 +38,26 @@ export default function WeeklyEditionCard({
 
       <Text style={styles.capture}>{capturedDays}/7 Days Captured</Text>
 
+      {displayStatus === "waiting" && (
+        <View style={styles.infoContainer}>
+          <Text style={styles.waiting}>Waiting to Start</Text>
+        </View>
+      )}
+
       {displayStatus === "draft" && (
-        <Text style={styles.status}>IN PROGRESS</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.progress}>In Progress</Text>
+        </View>
+      )}
+
+      {displayStatus === "empty" && (
+        <View style={styles.infoContainer}>
+          <Text style={styles.emptyTitle}>A Quiet Week</Text>
+
+          <Text style={styles.emptySubtitle}>
+            No memories were captured this week.
+          </Text>
+        </View>
       )}
 
       {displayStatus === "ready" && (
@@ -56,7 +67,9 @@ export default function WeeklyEditionCard({
       )}
 
       {displayStatus === "generating" && (
-        <Text style={styles.status}>GENERATING...</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.progress}>Generating Edition…</Text>
+        </View>
       )}
 
       {displayStatus === "completed" && (
@@ -77,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     padding: 18,
     borderRadius: 18,
-    marginBottom: 14,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: "#ECECEC",
   },
@@ -85,59 +98,85 @@ const styles = StyleSheet.create({
   week: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1F1F1F",
+    color: "#222",
   },
 
   date: {
     marginTop: 6,
+    fontSize: 15,
     color: "#777",
   },
 
   capture: {
-    marginTop: 12,
+    marginTop: 14,
+    fontSize: 16,
     fontWeight: "600",
     color: "#A98B5E",
   },
-  status: {
-    marginTop: 14,
 
-    color: "#A98B5E",
-
-    fontWeight: "700",
-
-    letterSpacing: 1,
+  infoContainer: {
+    marginTop: 18,
   },
+
+  progress: {
+    color: "#A98B5E",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+
+  waiting: {
+    color: "#999",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  emptyTitle: {
+    color: "#8A8A8A",
+    fontSize: 17,
+    fontWeight: "700",
+  },
+
+  emptySubtitle: {
+    marginTop: 6,
+    color: "#A3A3A3",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
   publishButton: {
-  marginTop: 16,
-  backgroundColor: "#A98B5E",
-  paddingVertical: 12,
-  borderRadius: 12,
-  alignItems: "center",
-},
+    marginTop: 18,
+    backgroundColor: "#A98B5E",
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: "center",
+  },
 
-publishText: {
-  color: "#FFF",
-  fontWeight: "700",
-  fontSize: 15,
-},
+  publishText: {
+    color: "#FFF",
+    fontSize: 15,
+    fontWeight: "700",
+  },
 
-readButton: {
-  marginTop: 16,
-  borderWidth: 1,
-  borderColor: "#A98B5E",
-  paddingVertical: 12,
-  borderRadius: 12,
-  alignItems: "center",
-},
+  readButton: {
+    marginTop: 18,
+    borderWidth: 1.5,
+    borderColor: "#A98B5E",
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: "center",
+  },
 
-readText: {
-  color: "#A98B5E",
-  fontWeight: "700",
-},
+  readText: {
+    color: "#A98B5E",
+    fontSize: 15,
+    fontWeight: "700",
+  },
 
-failed: {
-  marginTop: 16,
-  color: "#D64545",
-  fontWeight: "700",
-},
+  failed: {
+    marginTop: 18,
+    color: "#D64545",
+    fontWeight: "700",
+    fontSize: 15,
+  },
 });

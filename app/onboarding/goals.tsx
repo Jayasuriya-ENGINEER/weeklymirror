@@ -33,18 +33,6 @@ const GOAL_OPTIONS = [
     title: "Track personal growth",
     description: "I want to see how far I've come",
   },
-  {
-    id: "legacy",
-    icon: "📖",
-    title: "Leave a legacy",
-    description: "I want to document my life for future generations",
-  },
-  {
-    id: "writing",
-    icon: "✍️",
-    title: "Improve my writing",
-    description: "I want to become a better storyteller",
-  },
 ];
 
 // Pain point options

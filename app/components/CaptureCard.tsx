@@ -7,11 +7,20 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  useFonts,
+  PlayfairDisplay_700Bold,
+} from "@expo-google-fonts/playfair-display";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+} from "@expo-google-fonts/poppins";
 import { useMemoryStore } from "../../stores/memoryStore";
-
-
 import {
   createMemory,
   uploadImage,
@@ -25,20 +34,20 @@ export default function CaptureCard() {
   const triggerRefresh = useMemoryStore((state) => state.triggerRefresh);
   const [note, setNote] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  //const { addMemory } = useMemoryStore();
+  const [isUploading, setIsUploading] = useState(false);
   const user = useAuthStore((state) => state.user);
 
-  const today = new Date();
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_700Bold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_600SemiBold,
+  });
 
+  const today = new Date();
   const memoryDate = `${today.getFullYear()}-${String(
     today.getMonth() + 1,
   ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-
-
-
-
-
 
   const openGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -53,8 +62,6 @@ export default function CaptureCard() {
     }
   };
 
-
-  
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -90,104 +97,186 @@ export default function CaptureCard() {
           },
         ],
       );
-
       return;
     }
 
     openGallery();
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+  const handleSave = async () => {
+    try {
+      if (!note.trim()) {
+        Alert.alert("Missing Note", "Please write something.");
+        return;
+      }
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      console.log("IMAGE URI:", result.assets[0].uri);
+      if (!user) {
+        Alert.alert("Error", "User not found.");
+        return;
+      }
+
+      setIsUploading(true);
+      let imageUrl: string | undefined;
+
+      if (image) {
+        const { error, publicUrl } = await uploadImage(image);
+
+        if (error) {
+          Alert.alert("Upload Error", String(error));
+          setIsUploading(false);
+          return;
+        }
+
+        imageUrl = publicUrl ?? undefined;
+      }
+
+      const { error } = await createMemory(user.id, note, imageUrl, memoryDate);
+
+      if (error) {
+        Alert.alert("Database Error", error.message);
+        setIsUploading(false);
+        return;
+      }
+
+      Alert.alert("Saved", "Memory stored successfully");
+
+      setNote("");
+      setImage(null);
+
+      await syncEdition(user.id, memoryDate);
+
+      triggerRefresh();
+      setIsUploading(false);
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Something went wrong");
+      setIsUploading(false);
     }
   };
 
- const handleSave = async () => {
-   try {
-     if (!note.trim()) {
-       Alert.alert("Missing Note", "Please write something.");
-       return;
-     }
+  const removeImage = () => {
+    setImage(null);
+  };
 
-     if (!user) {
-       Alert.alert("Error", "User not found.");
-       return;
-     }
+  if (!fontsLoaded) {
+    return <ActivityIndicator size="small" color="#8B7355" />;
+  }
 
-     let imageUrl: string | undefined;
-
-     if (image) {
-       const { error, publicUrl } = await uploadImage(image);
-
-       if (error) {
-         Alert.alert("Upload Error", String(error));
-         return;
-       }
-
-       imageUrl = publicUrl ?? undefined;
-     }
-
-     const { error } = await createMemory(user.id, note, imageUrl , memoryDate);
-
-     if (error) {
-       Alert.alert("Database Error", error.message);
-       return;
-     }
-
-     Alert.alert("Saved", "Memory stored successfully");
-
-     setNote("");
-     setImage(null);
-
-     //this await is currently for a check will remove it later
-    await syncEdition(user.id, memoryDate);
-
-
-     triggerRefresh();
-     //this trigger here is for the autotrigger option
-   } catch (err) {
-     console.log(err);
-
-     Alert.alert("Error", "Something went wrong");
-   }
- };
-
-
+  const characterLimit = 200;
+  const progressPercentage = note.length / characterLimit;
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Today Memory</Text>
+      {/* Header with Icon */}
+      <View style={styles.header}>
+        <LinearGradient
+          colors={["#8B7355", "#A08B6E"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.headerIcon}
+        >
+          <Ionicons name="camera" size={20} color="#FFFFFF" />
+        </LinearGradient>
+        <Text style={styles.title}>Today Memory</Text>
+      </View>
 
-      <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-        <Text style={styles.photoButtonText}>
-          <Ionicons name="image-outline" size={20} color="#1F1F1F" />
-               Add Photo
-        </Text>
-      </TouchableOpacity>
+      {/* Photo Upload Section */}
+      {!image ? (
+        <TouchableOpacity
+          style={styles.photoButton}
+          onPress={pickImage}
+          activeOpacity={0.7}
+        >
+          <LinearGradient
+            colors={["#EFE6DA", "#E8DFD0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.photoButtonGradient}
+          >
+            <Ionicons name="image-outline" size={24} color="#8B7355" />
+            <Text style={styles.photoButtonText}>Add Photo</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image }} style={styles.preview} />
+          <TouchableOpacity
+            style={styles.removeImageButton}
+            onPress={removeImage}
+          >
+            <Ionicons name="close-circle" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+          <View style={styles.imageOverlay}>
+            <Text style={styles.imageOverlayText}>Photo Added</Text>
+          </View>
+        </View>
+      )}
 
-      {image && <Image source={{ uri: image }} style={styles.preview} />}
+      {/* Text Input Section */}
+      <View style={styles.inputContainer}>
+        <View style={styles.inputHeader}>
+          <Ionicons name="document-text-outline" size={18} color="#8B7355" />
+          <Text style={styles.inputLabel}>Your Story</Text>
+        </View>
 
-      <TextInput
-        placeholder="What happened today?"
-        placeholderTextColor="#888"
-        multiline
-        maxLength={500}
-        value={note}
-        onChangeText={setNote}
-        style={styles.input}
-      />
+        <TextInput
+          placeholder="What happened today?"
+          placeholderTextColor="#B8B8B8"
+          multiline
+          maxLength={characterLimit}
+          value={note}
+          onChangeText={setNote}
+          style={styles.input}
+          editable={!isUploading}
+        />
 
-      <Text style={styles.counter}>{note.length}/500</Text>
+        {/* Character Counter with Progress */}
+        <View style={styles.counterContainer}>
+          <View style={styles.progressBackground}>
+            <View
+              style={[
+                styles.progressBar,
+                {
+                  width: `${Math.min(progressPercentage * 100, 100)}%`,
+                  backgroundColor:
+                    progressPercentage > 0.9 ? "#FF6B6B" : "#8B7355",
+                },
+              ]}
+            />
+          </View>
+          <Text
+            style={[
+              styles.counter,
+              { color: progressPercentage > 0.9 ? "#FF6B6B" : "#8B7355" },
+            ]}
+          >
+            {note.length}/{characterLimit}
+          </Text>
+        </View>
+      </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Memory</Text>
+      {/* Save Button */}
+      <TouchableOpacity
+        style={[styles.saveButton, isUploading && styles.saveButtonDisabled]}
+        onPress={handleSave}
+        disabled={isUploading}
+        activeOpacity={0.8}
+      >
+        <LinearGradient
+          colors={isUploading ? ["#999", "#999"] : ["#1F1F1F", "#2C2C2C"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.saveButtonGradient}
+        >
+          {isUploading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              <Ionicons name="save-outline" size={20} color="#FFFFFF" />
+              <Text style={styles.saveButtonText}>Save Memory</Text>
+            </>
+          )}
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
@@ -196,68 +285,191 @@ export default function CaptureCard() {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 24,
+    padding: 24,
     marginVertical: 20,
+    shadowColor: "#8B7355",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 6,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: "rgba(139, 115, 85, 0.1)",
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+  },
+
+  headerIcon: {
+    padding: 10,
+    borderRadius: 12,
+    shadowColor: "#8B7355",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   title: {
+    fontFamily: "PlayfairDisplay_700Bold",
     fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 15,
     color: "#1F1F1F",
+    letterSpacing: 0.5,
   },
 
   photoButton: {
-    backgroundColor: "#EFE6DA",
-    paddingVertical: 15,
-    borderRadius: 12,
-    marginBottom: 15,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 20,
+  },
+
+  photoButtonGradient: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
   },
 
   photoButtonText: {
+    fontFamily: "Poppins_600SemiBold",
     fontSize: 16,
-    fontWeight: "600",
+    color: "#8B7355",
+  },
+
+  imageContainer: {
+    position: "relative",
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: "hidden",
   },
 
   preview: {
     width: "100%",
     height: 220,
-    borderRadius: 15,
-    marginBottom: 15,
+    borderRadius: 16,
+  },
+
+  removeImageButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 14,
+    padding: 2,
+  },
+
+  imageOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "rgba(139, 115, 85, 0.9)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+
+  imageOverlayText: {
+    fontFamily: "Poppins_500Medium",
+    color: "#FFFFFF",
+    fontSize: 12,
+    textAlign: "center",
+  },
+
+  inputContainer: {
+    marginBottom: 20,
+  },
+
+  inputHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+
+  inputLabel: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 14,
+    color: "#8B7355",
   },
 
   input: {
-    minHeight: 120,
-    borderWidth: 1,
-    borderColor: "#DDD",
-    borderRadius: 12,
-    padding: 15,
+    minHeight: 130,
+    borderWidth: 1.5,
+    borderColor: "#EFE6DA",
+    borderRadius: 16,
+    padding: 16,
     textAlignVertical: "top",
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: "Poppins_400Regular",
     backgroundColor: "#FAFAFA",
+    color: "#2C2C2C",
+    lineHeight: 22,
+  },
+
+  counterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 10,
+  },
+
+  progressBackground: {
+    flex: 1,
+    height: 4,
+    backgroundColor: "#EFE6DA",
+    borderRadius: 2,
+    overflow: "hidden",
+  },
+
+  progressBar: {
+    height: "100%",
+    borderRadius: 2,
   },
 
   counter: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 13,
+    minWidth: 50,
     textAlign: "right",
-    marginTop: 8,
-    color: "#666",
-    marginBottom: 15,
   },
 
   saveButton: {
-    backgroundColor: "#1F1F1F",
-    paddingVertical: 15,
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#1F1F1F",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+
+  saveButtonGradient: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
   },
 
   saveButtonText: {
-    color: "#FFF",
+    fontFamily: "Poppins_600SemiBold",
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "700",
+    letterSpacing: 0.5,
   },
 });

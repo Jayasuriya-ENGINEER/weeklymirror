@@ -50,11 +50,25 @@ export const saveProfile = async (
   avatarUrl: string | null,
 ) => {
   try {
-    const response = await supabase.from("profiles").upsert({
-      id: userId,
-      name,
-      avatar_url: avatarUrl,
-    });
+
+    const existing = await supabase
+  .from("profiles")
+  .select("id")
+  .eq("id", userId)
+  .maybeSingle();
+
+console.log("Existing profile:", existing.data);
+
+    const response = await supabase.from("profiles").upsert(
+  {
+    id: userId,
+    name,
+    avatar_url: avatarUrl,
+  },
+  {
+    onConflict: "id",
+  }
+);
 
     if (response.error) {
       console.log("SAVE PROFILE ERROR:", response.error);

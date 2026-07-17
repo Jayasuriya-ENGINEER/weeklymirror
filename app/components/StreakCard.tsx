@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-
-import { View, Text, StyleSheet } from "react-native";
-
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  useFonts,
+  PlayfairDisplay_700Bold,
+} from "@expo-google-fonts/playfair-display";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+} from "@expo-google-fonts/poppins";
 
 import { useAuthStore } from "../../stores/authStore";
-
 import { getUserMemoryDates } from "../../services/memoryService";
-
 import {
   calculateCurrentStreak,
   calculateLongestStreak,
@@ -15,10 +19,14 @@ import {
 
 export default function StreakCard() {
   const user = useAuthStore((state) => state.user);
-
   const [currentStreak, setCurrentStreak] = useState(0);
-
   const [bestStreak, setBestStreak] = useState(0);
+
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_700Bold,
+    Poppins_400Regular,
+    Poppins_500Medium,
+  });
 
   useEffect(() => {
     loadStreaks();
@@ -28,7 +36,6 @@ export default function StreakCard() {
     if (!user) return;
 
     const { data, error } = await getUserMemoryDates(user.id);
-
     console.log("STREAK DATA:", data);
 
     if (error) {
@@ -37,31 +44,41 @@ export default function StreakCard() {
     }
 
     const dates = data.map((item) => item.memory_date).filter(Boolean);
-
     setCurrentStreak(calculateCurrentStreak(dates));
-
     setBestStreak(calculateLongestStreak(dates));
   };
 
+  if (!fontsLoaded) {
+    return <ActivityIndicator size="small" color="#EFE7DA" />;
+  }
+
   return (
     <View style={styles.card}>
+      {/* Header Section */}
       <View style={styles.header}>
-        <Ionicons name="flame-outline" size={24} color="#1F1F1F" />
-
+        <View style={styles.iconContainer}>
+          <Ionicons name="flame" size={22} color="#FFFFFF" />
+        </View>
         <Text style={styles.title}>Streaks</Text>
       </View>
 
-      <View style={styles.row}>
-        <View>
-          <Text style={styles.label}>Current</Text>
+      {/* Subtle Divider */}
+      <View style={styles.divider} />
 
-          <Text style={styles.value}>{currentStreak} Days</Text>
+      {/* Stats Row */}
+      <View style={styles.row}>
+        <View style={styles.statBox}>
+          <Text style={styles.label}>Current</Text>
+          <Text style={styles.value}>{currentStreak}</Text>
+          <Text style={styles.unit}>Days</Text>
         </View>
 
-        <View>
-          <Text style={styles.label}>Best</Text>
+        <View style={styles.verticalDivider} />
 
-          <Text style={styles.value}>{bestStreak} Days</Text>
+        <View style={styles.statBox}>
+          <Text style={styles.label}>Best</Text>
+          <Text style={styles.value}>{bestStreak}</Text>
+          <Text style={styles.unit}>Days</Text>
         </View>
       </View>
     </View>
@@ -70,40 +87,88 @@ export default function StreakCard() {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: "#EFE6DA",
+    borderRadius: 24,
+    padding: 24,
     marginVertical: 15,
-    borderWidth: 1,
-    borderColor: "#ECECEC",
+    shadowColor: "#8B7355",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 18,
+    gap: 12,
+  },
+
+  iconContainer: {
+    padding: 10,
+    borderRadius: 14,
+    backgroundColor: "black",
+    shadowColor: "#8B7355",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   title: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "PlayfairDisplay_700Bold",
+    fontSize: 22,
+    color: "#1F1F1F",
+    letterSpacing: 0.5,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
+    marginVertical: 18,
   },
 
   row: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
   },
 
+  statBox: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  verticalDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "rgba(0, 0, 0, 0.06)",
+    marginHorizontal: 20,
+  },
+
   label: {
-    color: "#777",
-    fontSize: 14,
+    fontFamily: "Poppins_500Medium",
+    color: "#999",
+    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 4,
   },
 
   value: {
-    marginTop: 4,
-    fontSize: 24,
-    fontWeight: "700",
+    fontFamily: "PlayfairDisplay_700Bold",
+    fontSize: 36,
     color: "#1F1F1F",
+    lineHeight: 40,
+  },
+
+  unit: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+    color: "#B0B0B0",
+    marginTop: -2,
   },
 });
