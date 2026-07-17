@@ -8,7 +8,11 @@ import {
   TouchableOpacity,
   Linking,
   Image,
+  Modal,
 } from "react-native";
+
+import { TextInput } from "react-native";
+import { updateProfileName } from "../../services/profileService";
 
 import { Ionicons } from "@expo/vector-icons";
 
@@ -40,7 +44,7 @@ import {
   uploadProfileImage,
 } from "../../services/profileService";
 
-
+import { useProfileStore } from "../../stores/profileStore";
 
 export default function Settings() {
   const router = useRouter();
@@ -48,10 +52,19 @@ export default function Settings() {
   const [dailyReminder, setDailyReminder] = useState(true);
   const [weeklyReminder, setWeeklyReminder] = useState(true);
   const user = useAuthStore((state) => state.user);
-  const [userName, setUserName] = useState("Your Name");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const userName = useProfileStore((state) => state.name);
+  const avatarUrl = useProfileStore((state) => state.avatarUrl);
+
+  const setProfile = useProfileStore((state) => state.setProfile);
+  const updateName = useProfileStore((state) => state.updateName);
+  const updateAvatar = useProfileStore((state) => state.updateAvatar);
+
+
   const [showPicker, setShowPicker] = useState(false);
 
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState(userName);
   
 
 const [reminderTime, setReminderTime] = useState(() => {
@@ -108,7 +121,9 @@ const setupNotifications = async () => {
 useEffect(() => {
   loadProfile();
   loadSettings();
-}, []);
+  setNewName(userName);
+}, [userName]);
+
 
 
 const loadProfile = async () => {
@@ -118,13 +133,7 @@ const loadProfile = async () => {
 
   if (!data) return;
 
-  if (data.name) {
-    setUserName(data.name);
-  }
-
-  if (data.avatar_url) {
-    setAvatarUrl(data.avatar_url);
-  }
+ setProfile(data.name || "Your Name", data.avatar_url ?? null);
 };
 
 
@@ -143,6 +152,29 @@ const pickProfileImage = async () => {
     return;
   }
 
+
+  const saveName = async () => {
+    if (!user) return;
+
+    const trimmed = newName.trim();
+
+    if (!trimmed) return;
+
+    const { error } = await updateProfileName(user.id, trimmed);
+
+    if (error) {
+      Alert.alert("Error", error.message);
+      return;
+    }
+
+    updateName(trimmed);
+
+    setEditingName(false);
+
+    Alert.alert("Success", "Name updated.");
+  };
+
+  
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
     allowsEditing: true,
@@ -176,11 +208,32 @@ if (error || !avatarUrl) {
     return;
   }
 
-  setAvatarUrl(avatarUrl);
+ updateAvatar(avatarUrl);
 
   Alert.alert("Success", "Profile picture updated.");
 };
 
+
+const saveName = async () => {
+  if (!user) return;
+
+  const trimmed = newName.trim();
+
+  if (!trimmed) return;
+
+  const { error } = await updateProfileName(user.id, trimmed);
+
+  if (error) {
+    Alert.alert("Error", error.message);
+    return;
+  }
+
+  updateName(trimmed);
+
+  setEditingName(false);
+
+  Alert.alert("Success", "Name updated.");
+};
 
 
 
@@ -229,11 +282,14 @@ const loadSettings = async () => {
           )}
         </TouchableOpacity>
 
-        <View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setEditingName(true)}
+        >
           <Text style={styles.name}>{userName}</Text>
+        </TouchableOpacity>
 
-          <Text style={styles.email}>{user?.email || "your@email.com"}</Text>
-        </View>
+        <Text style={styles.email}>{user?.email || "your@email.com"}</Text>
       </View>
 
       <SectionTitle title="Support" />
@@ -359,6 +415,80 @@ const loadSettings = async () => {
           }}
         />
       )}
+
+      <Modal visible={editingName} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.4)",
+          }}
+        >
+          <View
+            style={{
+              width: "85%",
+              backgroundColor: "#FFF",
+              borderRadius: 20,
+              padding: 22,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 22,
+                fontWeight: "700",
+                color: "#222",
+              }}
+            >
+              Change your name
+            </Text>
+
+            <TextInput
+              value={newName}
+              onChangeText={setNewName}
+              style={{
+                marginTop: 20,
+                borderWidth: 1,
+                borderColor: "#DDD",
+                borderRadius: 14,
+                padding: 15,
+                fontSize: 16,
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                marginTop: 25,
+              }}
+            >
+              <TouchableOpacity onPress={() => setEditingName(false)}>
+                <Text
+                  style={{
+                    color: "#888",
+                    marginRight: 25,
+                    fontWeight: "600",
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={saveName}>
+                <Text
+                  style={{
+                    color: "#A98B5E",
+                    fontWeight: "700",
+                  }}
+                >
+                  Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

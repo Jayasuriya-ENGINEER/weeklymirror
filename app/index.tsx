@@ -7,41 +7,39 @@ import { setupNotifications } from "../services/notificationService";
 
 
 export default function Index() {
-  const router = useRouter();
-  const user = useAuthStore((state) => state.user);
-  const loading = useAuthStore((state) => state.loading);
+const router = useRouter();
+const user = useAuthStore((state) => state.user);
+const loading = useAuthStore((state) => state.loading);
 
 useEffect(() => {
-  if (loading) return;
+if (loading) return;
 
-  const initialize = async () => {
-    if (!user) {
-      router.replace("/login");
-      return;
-    }
+const initialize = async () => {
+if (!user) {
+router.replace("/login");
+return;
+}
 
-   await syncCurrentEdition(user.id);
+await syncCurrentEdition(user.id);
 
-   await setupNotifications();
+await setupNotifications();
 
-   router.replace("/(tabs)");
+const completed = await AsyncStorage.getItem("onboarding_complete");
 
-    const completed = await AsyncStorage.getItem("onboarding_complete");
+if (completed === "true") {
+router.replace("/(tabs)");
+} else {
+router.replace("/onboarding/welcome" as any);
+}
+};
 
-    if (completed === "true") {
-      router.replace("/(tabs)");
-    } else {
-      router.replace("/onboarding");
-    }
-  };
-
-  initialize();
+initialize();
 }, [loading, user]);
 
 
-  if (loading) {
-    return null;
-  }
+if (loading) {
+return null;
+}
 
-  return null;
+return null;
 }

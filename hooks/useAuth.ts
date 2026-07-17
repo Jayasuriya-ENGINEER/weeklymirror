@@ -26,6 +26,7 @@ export const useAuth = () => {
     }
 
     setProfile(data?.name || "Your Name", data?.avatar_url || null);
+    console.log("PROFILE FROM DB:", data);
   };
 
   useEffect(() => {

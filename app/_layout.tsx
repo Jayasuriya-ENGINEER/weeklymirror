@@ -1,4 +1,4 @@
-import { Redirect, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { useAuth } from "../hooks/useAuth";
 import { useAuthStore } from "../stores/authStore";
 
@@ -12,11 +12,6 @@ export default function RootLayout() {
     return null;
   }
 
-  return (
-    <>
-      <Stack screenOptions={{ headerShown: false }} />
-
-      {user ? <Redirect href="/(tabs)" /> : <Redirect href="/onboarding" />}
-    </>
-  );
+  // Let the index page handle the routing logic
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

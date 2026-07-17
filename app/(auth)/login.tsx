@@ -51,7 +51,9 @@ export default function Login() {
         setSession(data.session);
       }
 
-      router.replace("/(tabs)");
+      // Redirect to index which will handle onboarding check
+      // The useAuth hook in _layout will handle loading state
+      router.replace("/");
     } catch (error) {
       console.log(error);
 

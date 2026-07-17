@@ -24,19 +24,28 @@ export default function Signup() {
         return;
       }
 
-      const { error } = await signUp(email, password);
+      const { data, error } = await signUp(email, password);
 
       if (error) {
         Alert.alert("Signup Failed", error.message);
         return;
       }
 
-      Alert.alert(
-        "Success",
-        "Account created successfully. Please check your email if verification is enabled.",
-      );
-
-      router.replace("/login");
+      // Check if user was created and session exists
+      if (data.user && data.session) {
+        Alert.alert(
+          "Success",
+          "Account created successfully. Please check your email if verification is enabled.",
+        );
+        // Redirect to index which will check auth and onboarding
+        router.replace("/");
+      } else {
+        Alert.alert(
+          "Success",
+          "Account created successfully. Please check your email if verification is enabled.",
+        );
+        router.replace("/login");
+      }
     } catch (error) {
       console.log(error);
 
