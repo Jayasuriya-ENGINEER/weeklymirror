@@ -90,7 +90,7 @@ const future = isFutureMonth(month, year);
       />
       <Text style={styles.sectionTitle}>Editions</Text>
 
-      {future ? (
+      {future && editions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="sparkles-outline" size={52} color="#C8A25A" />
 

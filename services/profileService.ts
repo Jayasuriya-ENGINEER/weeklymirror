@@ -30,9 +30,14 @@ export const uploadProfileImage = async (userId: string, imageUri: string) => {
 
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
 
+    // Same storage path is reused on every upload, so the public URL string
+    // never changes. Append a cache-buster so the store updates and Image
+    // components (home + settings) reload the new file instead of a cached one.
+    const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
+
     return {
       error: null,
-      avatarUrl: data.publicUrl,
+      avatarUrl,
     };
   } catch (error) {
     console.log(error);

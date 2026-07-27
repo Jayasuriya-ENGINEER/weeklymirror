@@ -29,12 +29,20 @@ export const getEditions = async (
   month: number,
   year: number,
 ) => {
+  // Inclusive calendar bounds for the selected month (1-based month).
+  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+  // Show any week that overlaps this month (not only display_month).
+  // A week like Jul 27–Aug 2 must appear under July while it is in progress;
+  // filtering only on display_month (previously week-end month) hid it.
   return await supabase
     .from("weekly_editions")
     .select("*")
     .eq("user_id", userId)
-    .eq("display_month", month)
-    .eq("display_year", year)
+    .lte("start_date", endDate)
+    .gte("end_date", startDate)
     .order("issue_number");
 };
 

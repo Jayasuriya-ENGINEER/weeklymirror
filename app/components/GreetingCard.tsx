@@ -41,7 +41,11 @@ export default function GreetingCard() {
       <View style={styles.row}>
         <View style={styles.avatar}>
           {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            <Image
+              key={avatarUrl}
+              source={{ uri: avatarUrl }}
+              style={styles.avatarImage}
+            />
           ) : (
             <Ionicons name="person" size={30} color="#A98B5E" />
           )}

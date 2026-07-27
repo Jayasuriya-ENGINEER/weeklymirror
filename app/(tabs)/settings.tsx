@@ -277,7 +277,11 @@ const loadSettings = async () => {
           onPress={pickProfileImage}
         >
           {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+            <Image
+              key={avatarUrl}
+              source={{ uri: avatarUrl }}
+              style={styles.avatarImage}
+            />
           ) : (
             <Ionicons name="person" size={30} color="#A98B5E" />
           )}
