@@ -57,6 +57,25 @@ export default function CaptureCard() {
       quality: 0.8,
     });
 
+    const openCamera = async () => {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (!permission.granted) {
+        Alert.alert("Permission Required", "Please allow camera access.");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    };
+
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
@@ -91,8 +110,21 @@ export default function CaptureCard() {
           },
           {
             text: "Replace Photo",
-            onPress: async () => {
-              openGallery();
+            onPress: () => {
+              Alert.alert("Replace Photo", "Choose a source", [
+                {
+                  text: "Camera",
+                  onPress: openCamera,
+                },
+                {
+                  text: "Gallery",
+                  onPress: openGallery,
+                },
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+              ]);
             },
           },
         ],
@@ -100,7 +132,20 @@ export default function CaptureCard() {
       return;
     }
 
-    openGallery();
+    Alert.alert("Add Photo", "Choose a source", [
+      {
+        text: "Camera",
+        onPress: openCamera,
+      },
+      {
+        text: "Gallery",
+        onPress: openGallery,
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
   const handleSave = async () => {
@@ -165,6 +210,28 @@ export default function CaptureCard() {
   const characterLimit = 200;
   const progressPercentage = note.length / characterLimit;
 
+
+  //defining camera helper function to open camera and capture image
+  const openCamera = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert("Permission Required", "Please allow camera access.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  
   return (
     <View style={styles.card}>
       {/* Header with Icon */}

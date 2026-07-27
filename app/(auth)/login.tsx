@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 
 import { router } from "expo-router";
@@ -17,17 +18,10 @@ import {
 } from "../../services/authService";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useAuthStore } from "../../stores/authStore";
-import { Image } from "react-native";
-
 export default function Login() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const setUser = useAuthStore((state) => state.setUser);
-
-  const setSession = useAuthStore((state) => state.setSession);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     try {
@@ -43,14 +37,6 @@ export default function Login() {
         return;
       }
 
-      if (data.user) {
-        setUser(data.user);
-      }
-
-      if (data.session) {
-        setSession(data.session);
-      }
-
       // Redirect to index which will handle onboarding check
       // The useAuth hook in _layout will handle loading state
       router.replace("/");
@@ -63,7 +49,11 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+
+      if (result?.type === "success") {
+        router.replace("/");
+      }
     } catch (error: any) {
       Alert.alert(
         "Google Sign In",
@@ -71,7 +61,6 @@ export default function Login() {
       );
     }
   };
-
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
@@ -92,62 +81,80 @@ export default function Login() {
     );
   };
 
-
-return (
-  <View style={styles.container}>
-    <Text style={styles.logo}>WeeklyMirror</Text>
-
-    <Text style={styles.subtitle}>Capture today.{"\n"}Read it forever.</Text>
-
-    <TextInput
-      placeholder="Email"
-      placeholderTextColor="#999"
-      style={styles.input}
-      value={email}
-      onChangeText={setEmail}
-      autoCapitalize="none"
-    />
-
-    <TextInput
-      placeholder="Password"
-      placeholderTextColor="#999"
-      secureTextEntry
-      style={styles.input}
-      value={password}
-      onChangeText={setPassword}
-    />
-    <TouchableOpacity onPress={handleForgotPassword}>
-      <Text style={styles.forgot}>Forgot Password?</Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
-      <Text style={styles.signInText}>Sign In</Text>
-    </TouchableOpacity>
-
-    <View style={styles.divider}>
-      <View style={styles.line} />
-      <Text style={styles.or}>OR</Text>
-      <View style={styles.line} />
-    </View>
-
-    <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+  return (
+    <View style={styles.container}>
       <Image
-        source={require("../../assets/images/google-logo.png")}
-        style={styles.googleLogo}
+        source={require("../../assets/images/applogo.png")}
+        style={styles.appLogo}
       />
-      <Text style={styles.googleText}>Continue with Google</Text>
-    </TouchableOpacity>
 
-    <TouchableOpacity onPress={() => router.push("/signup")}>
-      <Text style={styles.footer}>
-        Don't have an account?{" "}
-        <Text style={{ color: "#A98B5E" }}>Create Account</Text>
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
+      <Text style={styles.logo}>WeeklyMirror</Text>
 
+      <Text style={styles.subtitle}>Capture today.{"\n"}Read it forever.</Text>
 
+      <TextInput
+        placeholder="Email"
+        placeholderTextColor="#999"
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+
+      <View style={styles.passwordContainer}>
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#999"
+          secureTextEntry={!showPassword}
+          style={styles.passwordInput}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          onPress={() => setShowPassword((prev) => !prev)}
+          style={styles.eyeButton}
+          accessibilityRole="button"
+          accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+        >
+          <Ionicons
+            name={showPassword ? "eye-off-outline" : "eye-outline"}
+            size={22}
+            color="#888"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgot}>Forgot Password?</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
+        <Text style={styles.signInText}>Sign In</Text>
+      </TouchableOpacity>
+
+      <View style={styles.divider}>
+        <View style={styles.line} />
+        <Text style={styles.or}>OR</Text>
+        <View style={styles.line} />
+      </View>
+
+      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+        <Image
+          source={require("../../assets/images/google-logo.png")}
+          style={styles.googleLogo}
+        />
+        <Text style={styles.googleText}>Continue with Google</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push("/signup")}>
+        <Text style={styles.footer}>
+          Don't have an account?{" "}
+          <Text style={{ color: "#A98B5E" }}>Create Account</Text>
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -156,6 +163,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 28,
     backgroundColor: "#F6F5F2",
+  },
+
+  appLogo: {
+    width: 88,
+    height: 88,
+    resizeMode: "contain",
+    alignSelf: "center",
+   
   },
 
   logo: {
@@ -178,8 +193,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 16,
     padding: 18,
-    marginBottom: 16,
+    marginBottom: 10,
     fontSize: 16,
+  },
+
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+
+  passwordInput: {
+    flex: 1,
+    padding: 18,
+    paddingRight: 8,
+    fontSize: 16,
+  },
+
+  eyeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
 
   signInButton: {

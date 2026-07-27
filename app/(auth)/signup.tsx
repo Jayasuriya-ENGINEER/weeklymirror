@@ -8,9 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-
 import { router } from "expo-router";
-
 import { signUp, signInWithGoogle } from "../../services/authService";
 
 export default function Signup() {
@@ -27,25 +25,26 @@ export default function Signup() {
       const { data, error } = await signUp(email, password);
 
       if (error) {
-        Alert.alert("Signup Failed", error.message);
+        Alert.alert(
+          "Signup Failed",
+          error instanceof Error ? error.message : "Unable to sign up.",
+        );
         return;
       }
 
       // Check if user was created and session exists
-      if (data.user && data.session) {
-        Alert.alert(
-          "Success",
-          "Account created successfully. Please check your email if verification is enabled.",
-        );
-        // Redirect to index which will check auth and onboarding
-        router.replace("/");
-      } else {
-        Alert.alert(
-          "Success",
-          "Account created successfully. Please check your email if verification is enabled.",
-        );
-        router.replace("/login");
-      }
+
+     Alert.alert(
+       "Verify your email",
+       "We've sent a verification link to your email. Please verify your account before signing in.",
+       [
+         {
+           text: "OK",
+           onPress: () => router.replace("/login"),
+         },
+       ],
+     );
+     
     } catch (error) {
       console.log(error);
 
@@ -66,6 +65,11 @@ export default function Signup() {
 
   return (
     <View style={styles.container}>
+       <Image
+              source={require("../../assets/images/applogo.png")}
+              style={styles.appLogo}
+            />
+      
       <Text style={styles.logo}>WeeklyMirror</Text>
 
       <Text style={styles.subtitle}>
@@ -135,6 +139,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#A98B5E",
     textAlign: "center",
+  },
+
+  appLogo: {
+    width: 88,
+    height: 88,
+    resizeMode: "contain",
+    alignSelf: "center",
   },
 
   subtitle: {

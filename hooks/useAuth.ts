@@ -45,22 +45,25 @@ export const useAuth = () => {
 
     loadSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("AUTH EVENT:", event);
-        console.log("SESSION:", session?.user?.email);
+   const { data: listener } = supabase.auth.onAuthStateChange(
+     async (event, session) => {
+       console.log("AUTH EVENT:", event);
+       console.log("SESSION:", session?.user?.email);
 
-        if (session) {
-          setSession(session);
-          setUser(session.user);
+       if (session) {
+         setSession(session);
+         setUser(session.user);
 
-          await fetchProfile(session.user.id);
-        } else {
-          clearAuth();
-          clearProfile();
-        }
-      },
-    );
+         await fetchProfile(session.user.id);
+       } else {
+         clearAuth();
+         clearProfile();
+       }
+
+       setLoading(false);
+     },
+     
+   );
 
     console.log("useAuth mounted");
 

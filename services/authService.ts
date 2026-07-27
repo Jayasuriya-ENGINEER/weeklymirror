@@ -50,10 +50,15 @@ export const signInWithGoogle = async () => {
       const refresh_token = params.get("refresh_token");
 
       if (access_token && refresh_token) {
+
+        console.log("Calling setSession...");
+
         const { data, error } = await supabase.auth.setSession({
           access_token,
           refresh_token,
         });
+
+        console.log("session ends...");
 
         console.log("SET SESSION:", data.session?.user.email, error);
       }

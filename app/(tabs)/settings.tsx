@@ -73,28 +73,29 @@ const [reminderTime, setReminderTime] = useState(() => {
   date.setMinutes(0);
   return date;
 });
-  const handleLogout = () => {
-    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Sign Out",
-        style: "destructive",
-        onPress: async () => {
-          const { error } = await supabase.auth.signOut();
+ const handleLogout = () => {
+   Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+     {
+       text: "Cancel",
+       style: "cancel",
+     },
+     {
+       text: "Sign Out",
+       style: "destructive",
+       onPress: async () => {
+         const { error } = await supabase.auth.signOut();
 
-          if (error) {
-            Alert.alert("Error", error.message);
-            return;
-          }
+          if (error) { Alert.alert("Error", "Failed to sign out. Please try again."); return; }
 
-          router.replace("/(auth)/login");
-        },
-      },
-    ]);
-  };
+         setTimeout(() => {
+           router.replace("/login");
+         }, 0);
+         // Don't navigate here.
+         // useAuth + index.tsx will do it automatically.
+       },
+     },
+   ]);
+ };
 const setupNotifications = async () => {
   const granted = await requestNotificationPermission();
 
@@ -357,32 +358,6 @@ const loadSettings = async () => {
 
       <Text style={styles.version}>Version 1.0.0</Text>
 
-      <TouchableOpacity
-        style={{
-          marginTop: 20,
-          backgroundColor: "#A98B5E",
-          padding: 15,
-          borderRadius: 12,
-        }}
-        onPress={async () => {
-          const granted = await requestNotificationPermission();
-
-          if (granted) {
-            await sendTestNotification();
-            Alert.alert("Success", "Notification scheduled in 10 seconds.");
-          }
-        }}
-      >
-        <Text
-          style={{
-            color: "white",
-            textAlign: "center",
-            fontWeight: "700",
-          }}
-        >
-          Test Notification
-        </Text>
-      </TouchableOpacity>
 
       <TouchableOpacity style={styles.logout} onPress={handleLogout}>
         <Text style={styles.logoutText}>Sign Out</Text>

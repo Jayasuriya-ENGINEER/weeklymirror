@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "../../lib/supabase";
+import { useAuthStore } from "../../stores/authStore";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -18,11 +19,28 @@ const CURRENT_SCREEN = 7;
 
 export default function OnboardingFinalCTA() {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+const startTrial = async () => {
+  try {
+    if (user) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          onboarding_completed: true,
+        })
+        .eq("id", user.id);
 
-  const startTrial = async () => {
-    await AsyncStorage.setItem("onboarding_complete", "true");
+      if (error) {
+        console.error(error);
+        return;
+      }
+    }
+
     router.replace("/(tabs)" as any);
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const learnMore = () => {
     router.replace("/(tabs)" as any);
