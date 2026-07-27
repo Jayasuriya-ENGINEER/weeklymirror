@@ -1,6 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { getEditionStatus } from "../../utils/editionStatus";
+import {
+  AI_PUBLISH_MIN_DAYS,
+  getEditionStatus,
+} from "../../utils/editionStatus";
 
 interface Props {
   id: string;
@@ -13,9 +16,6 @@ interface Props {
   onPublish?: () => void;
   onRead?: () => void;
 }
-
-
-
 
 export default function WeeklyEditionCard({
   issueNumber,
@@ -47,6 +47,26 @@ export default function WeeklyEditionCard({
       {displayStatus === "draft" && (
         <View style={styles.infoContainer}>
           <Text style={styles.progress}>In Progress</Text>
+          <Text style={styles.hint}>
+            Preview your week as a newspaper anytime. AI publish unlocks after
+            the week ends with at least {AI_PUBLISH_MIN_DAYS} days captured.
+          </Text>
+          <TouchableOpacity style={styles.readButton} onPress={onRead}>
+            <Text style={styles.readText}>View Edition</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {displayStatus === "simple" && (
+        <View style={styles.infoContainer}>
+          <Text style={styles.progress}>Week Complete</Text>
+          <Text style={styles.hint}>
+            Fewer than {AI_PUBLISH_MIN_DAYS} days were captured, so this week
+            stays as a personal newspaper snapshot.
+          </Text>
+          <TouchableOpacity style={styles.readButton} onPress={onRead}>
+            <Text style={styles.readText}>View Edition</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -61,9 +81,19 @@ export default function WeeklyEditionCard({
       )}
 
       {displayStatus === "ready" && (
-        <TouchableOpacity style={styles.publishButton} onPress={onPublish}>
-          <Text style={styles.publishText}>Publish Edition</Text>
-        </TouchableOpacity>
+        <View style={styles.infoContainer}>
+          <Text style={styles.progress}>Ready to Publish</Text>
+          <Text style={styles.hint}>
+            {capturedDays} days captured — AI can turn this week into a polished
+            edition.
+          </Text>
+          <TouchableOpacity style={styles.readButton} onPress={onRead}>
+            <Text style={styles.readText}>Preview Newspaper</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.publishButton} onPress={onPublish}>
+            <Text style={styles.publishText}>Publish with AI</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       {displayStatus === "generating" && (
@@ -79,7 +109,15 @@ export default function WeeklyEditionCard({
       )}
 
       {displayStatus === "failed" && (
-        <Text style={styles.failed}>Generation Failed</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.failed}>Generation Failed</Text>
+          <TouchableOpacity style={styles.readButton} onPress={onRead}>
+            <Text style={styles.readText}>View Newspaper</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.publishButton} onPress={onPublish}>
+            <Text style={styles.publishText}>Try AI Again</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -125,6 +163,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
+  hint: {
+    marginTop: 8,
+    color: "#888",
+    fontSize: 13,
+    lineHeight: 19,
+  },
+
   waiting: {
     color: "#999",
     fontSize: 16,
@@ -145,7 +190,7 @@ const styles = StyleSheet.create({
   },
 
   publishButton: {
-    marginTop: 18,
+    marginTop: 12,
     backgroundColor: "#A98B5E",
     paddingVertical: 13,
     borderRadius: 12,
@@ -159,7 +204,7 @@ const styles = StyleSheet.create({
   },
 
   readButton: {
-    marginTop: 18,
+    marginTop: 12,
     borderWidth: 1.5,
     borderColor: "#A98B5E",
     paddingVertical: 13,
@@ -174,7 +219,6 @@ const styles = StyleSheet.create({
   },
 
   failed: {
-    marginTop: 18,
     color: "#D64545",
     fontWeight: "700",
     fontSize: 15,

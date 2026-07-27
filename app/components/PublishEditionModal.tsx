@@ -34,8 +34,9 @@ export default function PublishEditionModal({
           </Text>
 
           <Text style={styles.subtitle}>
-            Your memories will be transformed into a beautifully formatted
-            weekly edition using AI.
+            You captured enough days this week. AI will turn your memories into
+            a polished newspaper edition — titles, summary, quote, and daily
+            articles.
           </Text>
 
           <View style={styles.statsContainer}>
