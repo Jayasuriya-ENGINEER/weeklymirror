@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { TextInput } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { updateProfileName } from "../../services/profileService";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -261,11 +262,12 @@ const loadSettings = async () => {
 };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 120 }}
-      showsVerticalScrollIndicator={false}
-    >
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>Settings</Text>
 
       <SectionTitle title="Account" />
@@ -468,10 +470,15 @@ const loadSettings = async () => {
         </View>
       </Modal>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F6F5F2",
+  },
   container: {
     flex: 1,
     backgroundColor: "#F6F5F2",

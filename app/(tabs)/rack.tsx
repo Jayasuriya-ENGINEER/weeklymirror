@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import WeeklyEditionCard from "../components/WeeklyEditionCard";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -75,7 +76,7 @@ export default function Rack() {
   };
 
   return (
-    <>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -158,11 +159,15 @@ export default function Rack() {
         }}
         onPublish={confirmPublish}
       />
-    </>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F6F5F2",
+  },
   container: {
     flex: 1,
     backgroundColor: "#F6F5F2",

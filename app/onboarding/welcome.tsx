@@ -12,26 +12,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
-// Placeholder for device mockup - you can replace with actual screenshot
-const DeviceMockup = () => (
-  <View style={styles.deviceContainer}>
-    <View style={styles.deviceFrame}>
-      <View style={styles.deviceScreen}>
-        <View style={styles.mockupHeader}>
-          <Text style={styles.mockupTitle}>WEEKLYMIRROR</Text>
-          <Text style={styles.mockupSubtitle}>Issue #1</Text>
-        </View>
-        <View style={styles.mockupContent}>
-          <View style={styles.mockupImage} />
-          <Text style={styles.mockupArticleTitle}>My Week in Review</Text>
-          <Text style={styles.mockupArticleText}>
-            This week was filled with small joys and meaningful moments...
-          </Text>
-        </View>
-      </View>
-    </View>
-  </View>
-);
 
 const TOTAL_SCREENS = 8;
 
@@ -48,13 +28,7 @@ export default function OnboardingWelcome() {
         {/* Progress dots */}
         <View style={styles.dotsContainer}>
           {Array.from({ length: TOTAL_SCREENS }).map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                i === 0 && styles.activeDot,
-              ]}
-            />
+            <View key={i} style={[styles.dot, i === 0 && styles.activeDot]} />
           ))}
         </View>
 
@@ -64,7 +38,19 @@ export default function OnboardingWelcome() {
           forever
         </Text>
 
-        <DeviceMockup />
+        <View style={styles.heroContainer}>
+          <Image
+            source={require("../../assets/images/b2.png")}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
+
+          <Image
+            source={require("../../assets/images/b1.png")}
+            style={styles.heroOverlay}
+            resizeMode="contain"
+          />
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={next}>
           <Text style={styles.buttonText}>Get Started</Text>
@@ -111,9 +97,9 @@ const styles = StyleSheet.create({
     lineHeight: 42,
   },
   subheadline: {
-    marginTop: 20,
+    marginTop: 10,
     fontSize: 18,
-    lineHeight: 32,
+    lineHeight: 18,
     color: "#666",
     textAlign: "center",
     paddingHorizontal: 20,
@@ -192,5 +178,41 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "700",
     fontSize: 17,
+  },
+
+  heroContainer: {
+    width: "100%",
+    height: 360,
+    marginTop: 3,
+    marginBottom: 4,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
+  },
+
+  heroImage: {
+
+    width: width * 0.58,
+    height: 320,
+
+    position: "absolute",
+
+    left: width * 0.08,
+    bottom: 0,
+
+    transform: [{ rotate: "-25deg" }],
+  },
+
+  heroOverlay: {
+    width: width * 0.58,
+    height: 320,
+
+    position: "absolute",
+
+    right: width * 0.08,
+    top: 10,
+    borderRadius: 45,
+
+    transform: [{ rotate: "18deg" }],
   },
 });
