@@ -13,12 +13,7 @@
     },
     "android": {
       "package": "com.suriya.weeklymirror",
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
+      "icon": "./assets/images/icon.png",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -35,10 +30,8 @@
           "image": "./assets/images/applogo.png",
           "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
           "dark": {
-            "image": "./assets/images/applogo.png",
-            "backgroundColor": "#ffffff"
+            "image": "./assets/images/applogo.png"
           }
         }
       ],
@@ -49,6 +42,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0c97dbfb-ebce-46a1-9226-9a59de261a88"
+      }
     }
   }
 }

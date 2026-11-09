@@ -319,7 +319,7 @@ const loadSettings = async () => {
           value={dailyReminder}
           onValueChange={(value) => {
             setDailyReminder(value);
-            saveDailyReminder(value);
+            saveDailyReminder(value); 
           }}
         />
       </View>
