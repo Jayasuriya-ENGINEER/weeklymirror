@@ -56,7 +56,7 @@ export default function AnimatedSplashScreen({
   const [titleVisible, setTitleVisible] = useState("");
   const [quoteText, setQuoteText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
-
+// Refs to track timers and state across renders
   const firstQuoteDoneRef = useRef(false);
   const titleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
